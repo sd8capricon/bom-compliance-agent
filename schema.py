@@ -9,23 +9,12 @@ class Substance(BaseModel):
     """
 
     name: str = Field(..., description="The name of the substance (e.g., 'Lead').")
-    value: float = Field(
+    value: float | None = Field(
         ..., description="The concentration or amount of the substance."
     )
-    unit: str = Field(
+    unit: str | None = Field(
         ..., description="The unit of measurement (e.g., 'mg/kg', 'ppm')."
     )
-
-
-class Tolerance(BaseModel):
-    """
-    Represents a tolerance limit for a substance in a specific unit.
-    """
-
-    value: float = Field(
-        ..., description="The maximum allowed value for the substance."
-    )
-    unit: str = Field(..., description="The unit of measurement for the tolerance.")
 
 
 class Part(BaseModel):
@@ -38,8 +27,8 @@ class Part(BaseModel):
     bom: list[Part] | None = Field(
         None, description="A list of sub-parts, if this is an assembly."
     )
-    substances: list[Substance] | None = Field(
-        None, description="A list of substances found in the part."
+    substances: list[Substance] = Field(
+        [], description="A list of substances found in the part."
     )
 
 
@@ -51,10 +40,31 @@ class Jurisdiction(BaseModel):
     name: str = Field(
         ..., description="The name of the jurisdiction (e.g., 'RoHS', 'REACH')."
     )
-    substance_tolerances: list[Substance] | None = Field(
-        None,
+    substance_tolerances: list[Substance] = Field(
+        [],
         description="A list of substances and their tolerances applicable to this jurisdiction.",
     )
+
+
+class Jurisdictions(BaseModel):
+    jurisdictions: list[Jurisdiction] = Field(
+        [],
+        description="A list of unique jurisdictions, each containing its name and the list "
+        "of substance tolerances that apply within that jurisdiction. "
+        "Each jurisdiction should appear only once, with all relevant "
+        "substances merged, and without duplicate substances.",
+    )
+
+
+class Tolerance(BaseModel):
+    """
+    Represents a tolerance limit for a substance in a specific unit.
+    """
+
+    value: float = Field(
+        ..., description="The maximum allowed value for the substance."
+    )
+    unit: str = Field(..., description="The unit of measurement for the tolerance.")
 
 
 class Violation(BaseModel):
@@ -91,11 +101,11 @@ class PartComplianceResult(BaseModel):
     is_compliant: bool | None = Field(
         ..., description="True if the part is compliant, False otherwise."
     )
-    violations: list[Violation] | None = Field(
-        None, description="A list of all compliance violations found."
+    violations: list[Violation] = Field(
+        [], description="A list of all compliance violations found."
     )
-    bom_results: list[PartComplianceResult] | None = Field(
-        None, description="The compliance results for the sub-parts in the BOM."
+    bom_results: list[PartComplianceResult] = Field(
+        [], description="The compliance results for the sub-parts in the BOM."
     )
 
 
