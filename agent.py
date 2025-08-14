@@ -1,3 +1,5 @@
+import json
+import os
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.documents import Document
 from langgraph.graph import END, START, StateGraph
@@ -17,7 +19,7 @@ class ComplianceCheckAgentState(BaseModel):
     file_path: str
     pages: list[Document] = []
     jurisdictions: list[Jurisdiction] = []
-    # part: Part
+    part: Part
 
 
 def parse_pdf(state: ComplianceCheckAgentState) -> ComplianceCheckAgentState:
@@ -66,6 +68,12 @@ def get_jurisdictions(state: ComplianceCheckAgentState) -> ComplianceCheckAgentS
     return state
 
 
+def check_part_compliance(
+    state: ComplianceCheckAgentState,
+) -> ComplianceCheckAgentState:
+    return state
+
+
 graph_builder = StateGraph(ComplianceCheckAgentState)
 # Graph Nodes
 graph_builder.add_node("parse_pdf", parse_pdf)
@@ -78,7 +86,14 @@ agent = graph_builder.compile()
 
 
 def main():
-    agent_state = ComplianceCheckAgentState(file_path="./data/documents/RoHS.pdf")
+    # Open and load the JSON file
+    part_path = os.path.join("data", "parts", "remote_controller.json")
+    with open(part_path, "r", encoding="utf-8") as file:
+        part = json.load(file)
+    # Path to compliance document
+    file_path = "./data/documents/RoHS.pdf"
+
+    agent_state = ComplianceCheckAgentState(file_path=file_path, part=part)
     res = ComplianceCheckAgentState.model_validate(agent.invoke(agent_state))
     print(res.jurisdictions)
 
