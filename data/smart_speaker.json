@@ -1,0 +1,69 @@
+{
+    "id": "SMART-SPEAKER-001",
+    "name": "Smart Speaker",
+    "substances": [
+        {
+            "name": "Recycled Plastic",
+            "value": 0.8,
+            "unit": "kg"
+        }
+    ],
+    "bom": [
+        {
+            "id": "ENCLOSURE-001",
+            "name": "Speaker Enclosure",
+            "substances": [
+                {
+                    "name": "PVC",
+                    "value": 0.05,
+                    "unit": "kg"
+                },
+                {
+                    "name": "Barium",
+                    "value": 0.0001,
+                    "unit": "mg/kg"
+                }
+            ]
+        },
+        {
+            "id": "BOARD-002",
+            "name": "Electronics Board",
+            "substances": [
+                {
+                    "name": "Solder Paste",
+                    "value": 0.003,
+                    "unit": "mg"
+                }
+            ],
+            "bom": [
+                {
+                    "id": "MIC-ARRAY-001",
+                    "name": "Microphone Array",
+                    "substances": [
+                        {
+                            "name": "Tantalum",
+                            "value": 0.002,
+                            "unit": "mg"
+                        }
+                    ]
+                },
+                {
+                    "id": "PROC-MOD-001",
+                    "name": "Processor Module",
+                    "substances": [
+                        {
+                            "name": "Tin",
+                            "value": 0.005,
+                            "unit": "mg"
+                        },
+                        {
+                            "name": "Lead",
+                            "value": 0.009,
+                            "unit": "mg"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
