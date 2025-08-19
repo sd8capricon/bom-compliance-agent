@@ -25,13 +25,13 @@ class SubstanceMapping(BaseModel):
     and a substance defined in a jurisdiction's regulatory list.
     """
 
-    part_substance_iupac: str | None = Field(
+    part_substance_standardized_name: str | None = Field(
         None,
         description="The standardized IUPAC name or elemental symbol of the substance "
         "as identified in the part's composition. This is mapped to the "
         "equivalent substance defined by the jurisdiction.",
     )
-    jurisidiction_substance_iupac: str | None = Field(
+    jurisidiction_substance_standardized_name: str | None = Field(
         None,
         description="The standardized IUPAC name or elemental symbol of the substance "
         "as specified by the jurisdiction's regulatory requirements. "

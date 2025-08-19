@@ -69,7 +69,7 @@ Return a JSON object following this schema:
 {format_instructions}
 
 Notes:
-- "part_substance_iupac" must be taken from the `standardized_name` field of the part substance.
-- "jurisdiction_substance_iupac" must be taken from the `standardized_name` field of the jurisdiction substance.
+- "part_substance_standardized_name" must be taken from the `standardized_name` field of the part substance.
+- "jurisdiction_substance_standardized_name" must be taken from the `standardized_name` field of the jurisdiction substance.
 - If multiple mappings exist, return them as multiple JSON objects (one per mapping).
 """
