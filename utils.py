@@ -7,8 +7,8 @@ from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
 
 from agent.models import SubstanceMappings, SubstanceNamePair
 from prompts import (
-    JURISDICTION_SUBSTANCE_EXTRACTION,
     JURISDICTION_PART_SUBSTANCE_MAPPING,
+    JURISDICTION_SUBSTANCE_EXTRACTION,
 )
 from schema import (
     CompliantSubstance,
@@ -16,7 +16,6 @@ from schema import (
     JurisdictionPartComplianceResult,
     Jurisdictions,
     Part,
-    Tolerance,
     Violation,
 )
 
