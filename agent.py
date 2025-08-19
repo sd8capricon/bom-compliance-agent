@@ -1,11 +1,12 @@
 import os
+
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.documents import Document
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 
 from schema import Jurisdiction, Part
-from utils import extract_jurisdiction, dfs_part_traversal
+from utils import dfs_part_traversal, extract_jurisdiction
 
 # ComplianceCheckAgent
 # 1. parse pdf file extract text from each page

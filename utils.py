@@ -1,18 +1,19 @@
+from typing import Tuple
+
 from dotenv import load_dotenv
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
-from typing import Tuple
 
 from prompts import JURISDICTION_SUBSTANCE_EXTRACTION
 from schema import (
+    CompliantSubstance,
     Jurisdiction,
+    JurisdictionPartComplianceResult,
     Jurisdictions,
     Part,
-    JurisdictionPartComplianceResult,
-    Violation,
     Tolerance,
-    CompliantSubstance,
+    Violation,
 )
 
 load_dotenv()
