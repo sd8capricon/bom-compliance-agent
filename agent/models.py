@@ -19,6 +19,16 @@ class ComplianceCheckAgentState(BaseModel):
     part: Part
 
 
+class Jurisdictions(BaseModel):
+    jurisdictions: list[Jurisdiction] = Field(
+        [],
+        description="A list of unique jurisdictions, each containing its name and the list "
+        "of substance tolerances that apply within that jurisdiction. "
+        "Each jurisdiction should appear only once, with all relevant "
+        "substances merged, and without duplicate substances.",
+    )
+
+
 class SubstanceNamePair(TypedDict):
     """
     Represents a substance by its common/trivial name and its standardized IUPAC name or element symbol.

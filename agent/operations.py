@@ -5,7 +5,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
 
-from agent.models import SubstanceMappings, SubstanceNamePair
+from agent.models import Jurisdictions, SubstanceMappings, SubstanceNamePair
 from prompts import (
     JURISDICTION_PART_SUBSTANCE_MAPPING,
     JURISDICTION_SUBSTANCE_EXTRACTION,
@@ -14,7 +14,6 @@ from schema import (
     CompliantSubstance,
     Jurisdiction,
     JurisdictionPartComplianceResult,
-    Jurisdictions,
     Part,
     Violation,
 )
