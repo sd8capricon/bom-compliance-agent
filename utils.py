@@ -82,7 +82,7 @@ def dfs_part_traversal(
 ) -> JurisdictionPartComplianceResult:
     """
     DFS traversal that builds a PartComplianceResult tree.
-    Compliance is determined by dummy logic and propagated upward.
+    Compliance is determined by check_jurisdiction_part_compliance and propagated upward.
     """
 
     # Check Part Compliance
