@@ -36,8 +36,8 @@ def extract_jurisdiction(text: str) -> list[Jurisdiction]:
     return [juridiction for juridiction in result.jurisdictions]
 
 
-# Dummy Function to check part compliance
-def check_part_compliance(
+# Dummy Function to check part compliance in a jurisdiction
+def check_jurisdiction_part_compliance(
     part: Part, jurisidiction: Jurisdiction
 ) -> Tuple[bool, list[Violation], list[CompliantSubstance]]:
 
@@ -86,7 +86,7 @@ def dfs_part_traversal(
     """
 
     # Check Part Compliance
-    is_compliant, violations, compliant_substances = check_part_compliance(
+    is_compliant, violations, compliant_substances = check_jurisdiction_part_compliance(
         part, jurisdiction
     )
 
