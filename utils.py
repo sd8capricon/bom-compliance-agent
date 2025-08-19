@@ -3,7 +3,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
 
-from prompts import JURISDICTION_EXTRACTION
+from prompts import JURISDICTION_SUBSTANCE_EXTRACTION
 from schema import Jurisdiction, Jurisdictions
 
 load_dotenv()
@@ -14,7 +14,7 @@ llm = ChatGoogleGenerativeAI(model=MODEL, temperature=0.25)
 
 def extract_jurisdiction(text: str) -> list[Jurisdiction]:
     parser = PydanticOutputParser(pydantic_object=Jurisdictions)
-    template = PromptTemplate.from_template(JURISDICTION_EXTRACTION)
+    template = PromptTemplate.from_template(JURISDICTION_SUBSTANCE_EXTRACTION)
     chain = template | llm | parser
 
     result: Jurisdictions = chain.invoke(

@@ -8,7 +8,13 @@ class Substance(BaseModel):
     Represents a chemical substance with its measured value and unit.
     """
 
-    name: str = Field(..., description="The name of the substance (e.g., 'Lead').")
+    name: str = Field(
+        ..., description="The common/trivial name of the substance (e.g., 'Lead')."
+    )
+    standardized_name: str = Field(
+        ...,
+        description="The standard IUPAC name of the substance/compound (e.g. ethanoic acid for acetic acid) or the standard element symbol as per periodic table (e.g. 'Pb' for Lead)",
+    )
     value: float | None = Field(
         ..., description="The concentration or amount of the substance."
     )
@@ -73,7 +79,12 @@ class Violation(BaseModel):
     """
 
     substance_name: str = Field(
-        ..., description="The name of the substance that is in violation."
+        ...,
+        description="The common/trivial name of the substance that is in violation.",
+    )
+    substance_iupac_name: str = Field(
+        ...,
+        description="The standard IUPAC name of the substance/compound (e.g. ethanoic acid for acetic acid) or the standard element symbol as per periodic table (e.g. 'Pb' for Lead)",
     )
     substance_concentration: Tolerance = Field(
         ..., description="The measured concentration of the substance."
