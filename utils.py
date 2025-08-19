@@ -9,7 +9,7 @@ from schema import (
     Jurisdiction,
     Jurisdictions,
     Part,
-    PartComplianceResult,
+    JurisdictionPartComplianceResult,
     Violation,
     Tolerance,
     CompliantSubstance,
@@ -77,7 +77,9 @@ def check_part_compliance(
     return False, violations, compliant_substances
 
 
-def dfs_part_traversal(part: Part, jurisdiction: Jurisdiction) -> PartComplianceResult:
+def dfs_part_traversal(
+    part: Part, jurisdiction: Jurisdiction
+) -> JurisdictionPartComplianceResult:
     """
     DFS traversal that builds a PartComplianceResult tree.
     Compliance is determined by dummy logic and propagated upward.
@@ -89,7 +91,7 @@ def dfs_part_traversal(part: Part, jurisdiction: Jurisdiction) -> PartCompliance
     )
 
     # Traverse Children
-    bom_results: list[PartComplianceResult] = []
+    bom_results: list[JurisdictionPartComplianceResult] = []
     if part.bom:
         for child in part.bom:
             child_result = dfs_part_traversal(child, jurisdiction)
@@ -98,7 +100,7 @@ def dfs_part_traversal(part: Part, jurisdiction: Jurisdiction) -> PartCompliance
                 is_compliant = False  # Propagate failure upward
                 # Append a violation with reason stating violation found in child
 
-    return PartComplianceResult(
+    return JurisdictionPartComplianceResult(
         part_id=part.id,
         part_name=part.name,
         jurisdiction_name=jurisdiction.name,

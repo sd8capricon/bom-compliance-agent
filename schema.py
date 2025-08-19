@@ -133,7 +133,7 @@ class CompliantSubstance(BaseModel):
     )
 
 
-class PartComplianceResult(BaseModel):
+class JurisdictionPartComplianceResult(BaseModel):
     """
     The compliance check result for a single part within a specific jurisdiction.
     """
@@ -154,7 +154,7 @@ class PartComplianceResult(BaseModel):
         [],
         description="A list of substances checked that were within limits (no violations).",
     )
-    bom_results: list[PartComplianceResult] = Field(
+    bom_results: list[JurisdictionPartComplianceResult] = Field(
         [], description="The compliance results for the sub-parts in the BOM."
     )
 
@@ -170,7 +170,7 @@ class ComplianceReport(BaseModel):
     jurisdictions: list[Jurisdiction] = Field(
         ..., description="A list of all jurisdictions checked in the report."
     )
-    top_level_part_result: PartComplianceResult = Field(
+    top_level_part_result: JurisdictionPartComplianceResult = Field(
         ...,
         description="The compliance result for the main part being analyzed, including all nested results.",
     )
