@@ -48,7 +48,6 @@ def check_jurisdiction_part_compliance(
     # Check if part has substances
     # Find 1:1 mapping
     # Compare the tolerances
-    # Check if it has BOM
     # Repeat Recusively
 
     jurisidiction_substance_names: list[SubstanceNamePair] = [
@@ -64,16 +63,24 @@ def check_jurisdiction_part_compliance(
     template = PromptTemplate.from_template(JURISDICTION_PART_SUBSTANCE_MAPPING)
     chain = template | llm | parser
 
-    if part_substance_names:
-        result: SubstanceMappings = chain.invoke(
-            {
-                "jurisidiction_substance_names": jurisidiction_substance_names,
-                "part_substance_names": part_substance_names,
-                "format_instructions": parser.get_format_instructions(),
-            }
-        )
+    is_compliant = True
+    violations: list[Violation] = []
+    compliant_substances: list[CompliantSubstance] = []
 
-    return False, [], []
+    if not part_substance_names:
+        return is_compliant, violations, compliant_substances
+
+    result: SubstanceMappings = chain.invoke(
+        {
+            "jurisidiction_substance_names": jurisidiction_substance_names,
+            "part_substance_names": part_substance_names,
+            "format_instructions": parser.get_format_instructions(),
+        }
+    )
+
+    print(result)
+
+    return is_compliant, violations, compliant_substances
 
 
 def dfs_part_traversal(
