@@ -1,11 +1,15 @@
-from typing import Tuple
+from typing import Tuple, TypedDict
 
 from dotenv import load_dotenv
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
 
-from prompts import JURISDICTION_SUBSTANCE_EXTRACTION
+from agent.models import SubstanceMappings, SubstanceNamePair
+from prompts import (
+    JURISDICTION_SUBSTANCE_EXTRACTION,
+    JURISDICTION_PART_SUBSTANCE_MAPPING,
+)
 from schema import (
     CompliantSubstance,
     Jurisdiction,
@@ -48,34 +52,29 @@ def check_jurisdiction_part_compliance(
     # Check if it has BOM
     # Repeat Recusively
 
-    violations = [
-        Violation(
-            substance_name="",
-            substance_iupac_name="",
-            substance_concentration=Tolerance(
-                value=0, unit="", tolerance_condition=None
-            ),
-            jurisdiction_tolerance=Tolerance(
-                value=0, unit="", tolerance_condition=None
-            ),
-            violation_reason="",
-        )
+    jurisidiction_substance_names: list[SubstanceNamePair] = [
+        {"name": substance.name, "standardized_name": substance.standardized_name}
+        for substance in jurisidiction.substance_tolerances
+    ]
+    part_substance_names: list[SubstanceNamePair] = [
+        {"name": substance.name, "standardized_name": substance.standardized_name}
+        for substance in part.substances
     ]
 
-    compliant_substances = [
-        CompliantSubstance(
-            substance_name="",
-            substance_iupac_name="",
-            substance_concentration=Tolerance(
-                value=0, unit="", tolerance_condition=None
-            ),
-            jurisdiction_tolerance=Tolerance(
-                value=0, unit="", tolerance_condition=None
-            ),
-        )
-    ]
+    parser = PydanticOutputParser(pydantic_object=SubstanceMappings)
+    template = PromptTemplate.from_template(JURISDICTION_PART_SUBSTANCE_MAPPING)
+    chain = template | llm | parser
 
-    return False, violations, compliant_substances
+    if part_substance_names:
+        result: SubstanceMappings = chain.invoke(
+            {
+                "jurisidiction_substance_names": jurisidiction_substance_names,
+                "part_substance_names": part_substance_names,
+                "format_instructions": parser.get_format_instructions(),
+            }
+        )
+
+    return False, [], []
 
 
 def dfs_part_traversal(
