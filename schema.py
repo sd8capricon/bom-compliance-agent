@@ -30,6 +30,19 @@ class Substance(BaseModel):
         "and 'eq' means equal to. If None, no condition is applied.",
     )
 
+    @classmethod
+    def find_by_standard_name(
+        cls, substances: list[Substance], standard_name: str
+    ) -> Substance | None:
+        """
+        Search for a substance in a collection by its standardized_name.
+        Returns the first match, or None if not found.
+        """
+        for sub in substances:
+            if sub.standardized_name == standard_name:
+                return sub
+        return None
+
 
 class Part(BaseModel):
     """
@@ -65,10 +78,12 @@ class Tolerance(BaseModel):
     Represents a tolerance limit for a substance in a specific unit.
     """
 
-    value: float = Field(
+    value: float | None = Field(
         ..., description="The maximum allowed value for the substance."
     )
-    unit: str = Field(..., description="The unit of measurement for the tolerance.")
+    unit: str | None = Field(
+        ..., description="The unit of measurement for the tolerance."
+    )
     tolerance_condition: Literal["gte", "lte", "eq"] | None = Field(
         None,
         description="Condition used to compare a value against a tolerance threshold. "
@@ -86,7 +101,7 @@ class Violation(BaseModel):
         ...,
         description="The common/trivial name of the substance that is in violation.",
     )
-    substance_iupac_name: str = Field(
+    substance_standard_name: str = Field(
         ...,
         description="The standard IUPAC name of the substance/compound (e.g. ethanoic acid for acetic acid) or the standard element symbol as per periodic table (e.g. 'Pb' for Lead)",
     )
@@ -111,7 +126,7 @@ class CompliantSubstance(BaseModel):
         ...,
         description="The common/trivial name of the substance that is in violation.",
     )
-    substance_iupac_name: str = Field(
+    substance_standard_name: str = Field(
         ...,
         description="The standard IUPAC name of the substance/compound (e.g. ethanoic acid for acetic acid) or the standard element symbol as per periodic table (e.g. 'Pb' for Lead)",
     )
@@ -121,6 +136,9 @@ class CompliantSubstance(BaseModel):
     jurisdiction_tolerance: Tolerance = Field(
         ...,
         description="The allowed tolerance limit for the substance in the jurisdiction.",
+    )
+    note: str = Field(
+        ..., description="Extra commentary on the compliance of the substance"
     )
 
 
