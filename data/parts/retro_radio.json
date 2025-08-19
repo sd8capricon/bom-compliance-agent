@@ -1,0 +1,34 @@
+{
+    "id": "RADIO-999",
+    "name": "Retro Radio",
+    "substances": [],
+    "bom": [
+        {
+            "id": "CHASSIS-001",
+            "name": "Metal Chassis",
+            "substances": [
+                {
+                    "name": "Steel",
+                    "value": 2.5,
+                    "unit": "kg"
+                }
+            ]
+        },
+        {
+            "id": "KNOB-001",
+            "name": "Tuning Knob",
+            "substances": [
+                {
+                    "name": "Lead",
+                    "value": 150.0,
+                    "unit": "mg/kg"
+                },
+                {
+                    "name": "Plastic",
+                    "value": 50.0,
+                    "unit": "g"
+                }
+            ]
+        }
+    ]
+}

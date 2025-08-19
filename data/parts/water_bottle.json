@@ -1,0 +1,39 @@
+{
+    "id": "BOTTLE-001",
+    "name": "Water Bottle",
+    "substances": [],
+    "bom": [
+        {
+            "id": "BODY-001",
+            "name": "Bottle Body",
+            "substances": [
+                {
+                    "name": "PET",
+                    "value": 99.9,
+                    "unit": "%"
+                },
+                {
+                    "name": "DEHP",
+                    "value": 10.0,
+                    "unit": "mg/kg"
+                }
+            ]
+        },
+        {
+            "id": "RING-001",
+            "name": "Sealing Ring",
+            "substances": [
+                {
+                    "name": "Silicone",
+                    "value": 99.8,
+                    "unit": "%"
+                },
+                {
+                    "name": "DEHP",
+                    "value": 5.0,
+                    "unit": "mg/kg"
+                }
+            ]
+        }
+    ]
+}

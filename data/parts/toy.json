@@ -1,0 +1,34 @@
+{
+    "id": "TOY-001",
+    "name": "Toy",
+    "substances": [],
+    "bom": [
+        {
+            "id": "BODY-002",
+            "name": "Toy Body",
+            "substances": [
+                {
+                    "name": "ABS Plastic",
+                    "value": 1.2,
+                    "unit": "kg"
+                }
+            ]
+        },
+        {
+            "id": "WHEELS-001",
+            "name": "Rubber Wheels",
+            "substances": [
+                {
+                    "name": "Natural Rubber",
+                    "value": 0.5,
+                    "unit": "kg"
+                },
+                {
+                    "name": "DEHP",
+                    "value": 1500.0,
+                    "unit": "mg/kg"
+                }
+            ]
+        }
+    ]
+}

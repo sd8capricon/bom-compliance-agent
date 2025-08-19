@@ -1,0 +1,37 @@
+{
+    "id": "REMOTE-001",
+    "name": "Remote Controller",
+    "substances": [],
+    "bom": [
+        {
+            "id": "PCB-ASSY-001",
+            "name": "PCB Assembly",
+            "substances": [
+                {
+                    "name": "Lead",
+                    "standardized_name": "Pb",
+                    "value": 0.009,
+                    "unit": "mg/kg"
+                },
+                {
+                    "name": "Tin",
+                    "standardized_name": "Sn",
+                    "value": 99.9,
+                    "unit": "%"
+                }
+            ]
+        },
+        {
+            "id": "CASING-001",
+            "name": "Plastic Casing",
+            "substances": [
+                {
+                    "name": "Brominated Flame Retardants",
+                    "standardized_name": "polybrominated diphenyl ethers",
+                    "value": 0.005,
+                    "unit": "mg/kg"
+                }
+            ]
+        }
+    ]
+}
