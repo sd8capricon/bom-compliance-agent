@@ -1,9 +1,7 @@
 import os
 
-from langgraph.graph import END, START, StateGraph
-
 from agent.models import ComplianceCheckAgentState
-from agent.steps import get_jurisdictions, parse_pdf
+from agent.workflow import agent
 from schema import Part
 
 # ComplianceCheckAgent
@@ -15,16 +13,6 @@ from schema import Part
 #   - Halt when non compliant part is reached
 #   - Ask user to continue checking or generate report of the seen parts
 # 4. generate the compliance report md
-
-graph_builder = StateGraph(ComplianceCheckAgentState)
-# Graph Nodes
-graph_builder.add_node("parse_pdf", parse_pdf)
-graph_builder.add_node("get_jurisdictions", get_jurisdictions)
-graph_builder.add_edge(START, "parse_pdf")
-# Graph Edges
-graph_builder.add_edge("parse_pdf", "get_jurisdictions")
-graph_builder.add_edge("get_jurisdictions", END)
-agent = graph_builder.compile()
 
 
 def main():
