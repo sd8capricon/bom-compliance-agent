@@ -1,6 +1,6 @@
 import os
 from schema import Jurisdiction, Substance, Part
-from utils import dfs_part_traversal
+from operations import dfs_part_traversal
 
 jurisdictions = [
     Jurisdiction(

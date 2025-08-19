@@ -6,7 +6,7 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 
 from schema import Jurisdiction, Part
-from utils import dfs_part_traversal, extract_jurisdiction
+from operations import dfs_part_traversal, extract_jurisdiction
 
 # ComplianceCheckAgent
 # 1. parse pdf file extract text from each page

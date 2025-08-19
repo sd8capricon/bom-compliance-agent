@@ -1,4 +1,4 @@
-from typing import Tuple, TypedDict
+from typing import Tuple
 
 from dotenv import load_dotenv
 from langchain.output_parsers import PydanticOutputParser
