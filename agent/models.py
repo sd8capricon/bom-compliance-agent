@@ -6,7 +6,17 @@ This module defines models specific to compliance check agent
 
 from typing import TypedDict
 
+from langchain_core.documents import Document
 from pydantic import BaseModel, Field
+
+from schema import Jurisdiction, Part
+
+
+class ComplianceCheckAgentState(BaseModel):
+    file_path: str
+    pages: list[Document] = []
+    jurisdictions: list[Jurisdiction] = []
+    part: Part
 
 
 class SubstanceNamePair(TypedDict):

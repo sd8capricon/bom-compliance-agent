@@ -1,12 +1,12 @@
 import os
 
 from langchain_community.document_loaders import PyMuPDFLoader
-from langchain_core.documents import Document
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 
-from schema import Jurisdiction, Part
+from agent.models import ComplianceCheckAgentState
 from operations import dfs_part_traversal, extract_jurisdiction
+from schema import Jurisdiction, Part
 
 # ComplianceCheckAgent
 # 1. parse pdf file extract text from each page
@@ -17,13 +17,6 @@ from operations import dfs_part_traversal, extract_jurisdiction
 #   - Halt when non compliant part is reached
 #   - Ask user to continue checking or generate report of the seen parts
 # 4. generate the compliance report md
-
-
-class ComplianceCheckAgentState(BaseModel):
-    file_path: str
-    pages: list[Document] = []
-    jurisdictions: list[Jurisdiction] = []
-    part: Part
 
 
 def parse_pdf(state: ComplianceCheckAgentState) -> ComplianceCheckAgentState:
