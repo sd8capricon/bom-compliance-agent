@@ -9,7 +9,7 @@ from typing import TypedDict
 from pydantic import BaseModel, Field
 
 
-class SubstanceIdentifier(TypedDict):
+class SubstanceNamePair(TypedDict):
     """
     Represents a substance by its common/trivial name and its standardized IUPAC name or element symbol.
     Used for lightweight lookups and mappings without requiring the full Substance model.
