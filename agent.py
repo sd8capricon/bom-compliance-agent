@@ -2,10 +2,9 @@ import os
 
 from langchain_community.document_loaders import PyMuPDFLoader
 from langgraph.graph import END, START, StateGraph
-from pydantic import BaseModel
 
 from agent.models import ComplianceCheckAgentState
-from operations import dfs_part_traversal, extract_jurisdiction
+from agent.operations import dfs_part_traversal, extract_jurisdiction
 from schema import Jurisdiction, Part
 
 # ComplianceCheckAgent
