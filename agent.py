@@ -12,6 +12,7 @@ from utils import extract_jurisdiction
 # 2. extract jurisdictions from each page, then deduplicate jurisdictions and substances within them
 # 3. check compliance of the part for each jurisdiction
 #   - DFS approach
+#   - Find the 1:1 mapping between jurisdiction and part substances
 #   - Halt when non compliant part is reached
 #   - Ask user to continue checking or generate report of the seen parts
 # 4. generate the compliance report md
