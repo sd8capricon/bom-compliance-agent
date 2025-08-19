@@ -15,6 +15,8 @@ from schema import (
     Jurisdiction,
     JurisdictionPartComplianceResult,
     Part,
+    Substance,
+    Tolerance,
     Violation,
 )
 
@@ -76,6 +78,53 @@ def check_jurisdiction_part_compliance(
             "format_instructions": parser.get_format_instructions(),
         }
     )
+
+    mappings = result.mappings
+
+    for mapping in mappings:
+        if not mapping.part_substance_standardized_name:
+            # Skip the substances which the part doesn't have
+            continue
+
+        part_substance = Substance.find_by_standard_name(
+            part.substances, mapping.part_substance_standardized_name
+        )
+
+        if part_substance is None:
+            raise ValueError(
+                f"Invalid substance in part, substance with standard name {mapping.part_substance_standardized_name} not found in part {part.name}"
+            )
+
+        if not mapping.jurisidiction_substance_standardized_name:
+            # Mark as compliant
+            # Note that jurisdiction didn't specify anything related to this
+            compliant_substances.append(
+                CompliantSubstance(
+                    substance_name=part_substance.name,
+                    substance_standard_name=part_substance.standardized_name,
+                    substance_concentration=Tolerance(
+                        value=part_substance.value,
+                        unit=part_substance.unit,
+                        tolerance_condition=None,
+                    ),
+                    jurisdiction_tolerance=Tolerance(
+                        value=None, unit=None, tolerance_condition=None
+                    ),
+                    note=f"The jurisdiction - {jurisidiction.name}, didn't specify this substance or their tolerances",
+                )
+            )
+            continue
+
+        jurisidiction_substance = Substance.find_by_standard_name(
+            jurisidiction.substance_tolerances,
+            mapping.jurisidiction_substance_standardized_name,
+        )
+
+        if jurisidiction_substance is None:
+            raise ValueError(
+                f"Invalid substance in jurisdiction, substance with standard name {mapping.jurisidiction_substance_standardized_name} not found in part {jurisidiction.name}"
+            )
+        tolerance_condition = jurisidiction_substance.tolerance_condition
 
     print(result)
 
