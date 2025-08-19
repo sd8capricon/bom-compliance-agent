@@ -44,3 +44,32 @@ Text:
 
 {format_instructions}
 """
+
+JURISDICTION_PART_SUBSTANCE_MAPPING = """
+You are a **Substance Mapping Agent**.  
+Your role is to align chemical substances from a Bill of Materials (part) with regulatory substances defined by a jurisdiction.  
+You must rely on chemical knowledge, synonyms, trivial/common names, IUPAC names, and elemental symbols to decide the best mappings.
+
+You are given two lists of substances:
+
+1. **Jurisdiction substances** (regulated list):
+{jurisidiction_substance_names}
+
+2. **Part substances** (from the BOM part):
+{part_substance_names}
+
+Task:
+- Identify the best match between substances from the part and substances from the jurisdiction.
+- Matching should be based on chemical equivalence, synonyms, or element symbols (e.g., "Lead" ↔ "Pb").
+- If a mapping cannot be found, leave the corresponding field as null.
+
+Output:
+Return a JSON object following this schema:
+
+{format_instructions}
+
+Notes:
+- "part_substance_iupac" must be taken from the `standardized_name` field of the part substance.
+- "jurisdiction_substance_iupac" must be taken from the `standardized_name` field of the jurisdiction substance.
+- If multiple mappings exist, return them as multiple JSON objects (one per mapping).
+"""
