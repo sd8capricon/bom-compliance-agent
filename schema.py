@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -20,6 +21,12 @@ class Substance(BaseModel):
     )
     unit: str | None = Field(
         ..., description="The unit of measurement (e.g., 'mg/kg', 'ppm')."
+    )
+    tolerance_condition: Literal["gte", "lte", "eq"] | None = Field(
+        None,
+        description="Condition used to compare a value against a tolerance threshold. "
+        "'gte' means greater than or equal to, 'lte' means less than or equal to, "
+        "and 'eq' means equal to. If None, no condition is applied.",
     )
 
 
@@ -71,6 +78,12 @@ class Tolerance(BaseModel):
         ..., description="The maximum allowed value for the substance."
     )
     unit: str = Field(..., description="The unit of measurement for the tolerance.")
+    tolerance_condition: Literal["gte", "lte", "eq"] | None = Field(
+        None,
+        description="Condition used to compare a value against a tolerance threshold. "
+        "'gte' means greater than or equal to, 'lte' means less than or equal to, "
+        "and 'eq' means equal to. If None, no condition is applied.",
+    )
 
 
 class Violation(BaseModel):
