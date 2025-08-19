@@ -5,7 +5,7 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 
 from schema import Jurisdiction, Part
-from utils import extract_jurisdiction
+from utils import extract_jurisdiction, dfs_part_traversal
 
 # ComplianceCheckAgent
 # 1. parse pdf file extract text from each page
@@ -74,6 +74,10 @@ def get_jurisdictions(state: ComplianceCheckAgentState) -> ComplianceCheckAgentS
 def check_part_compliance(
     state: ComplianceCheckAgentState,
 ) -> ComplianceCheckAgentState:
+    for jurisdiction in state.jurisdictions:
+        jurisdiction_part_compliance_report = dfs_part_traversal(
+            state.part, jurisdiction
+        )
     return state
 
 

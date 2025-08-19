@@ -2,9 +2,18 @@ from dotenv import load_dotenv
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
+from typing import Tuple
 
 from prompts import JURISDICTION_SUBSTANCE_EXTRACTION
-from schema import Jurisdiction, Jurisdictions
+from schema import (
+    Jurisdiction,
+    Jurisdictions,
+    Part,
+    PartComplianceResult,
+    Violation,
+    Tolerance,
+    CompliantSubstance,
+)
 
 load_dotenv()
 
@@ -25,3 +34,76 @@ def extract_jurisdiction(text: str) -> list[Jurisdiction]:
         return []
 
     return [juridiction for juridiction in result.jurisdictions]
+
+
+# Dummy Function to check part compliance
+def check_part_compliance(
+    part: Part, jurisidiction: Jurisdiction
+) -> Tuple[bool, list[Violation], list[CompliantSubstance]]:
+
+    # Check if part has substances
+    # Find 1:1 mapping
+    # Compare the tolerances
+    # Check if it has BOM
+    # Repeat Recusively
+
+    violations = [
+        Violation(
+            substance_name="",
+            substance_iupac_name="",
+            substance_concentration=Tolerance(
+                value=0, unit="", tolerance_condition=None
+            ),
+            jurisdiction_tolerance=Tolerance(
+                value=0, unit="", tolerance_condition=None
+            ),
+            violation_reason="",
+        )
+    ]
+
+    compliant_substances = [
+        CompliantSubstance(
+            substance_name="",
+            substance_iupac_name="",
+            substance_concentration=Tolerance(
+                value=0, unit="", tolerance_condition=None
+            ),
+            jurisdiction_tolerance=Tolerance(
+                value=0, unit="", tolerance_condition=None
+            ),
+        )
+    ]
+
+    return False, violations, compliant_substances
+
+
+def dfs_part_traversal(part: Part, jurisdiction: Jurisdiction) -> PartComplianceResult:
+    """
+    DFS traversal that builds a PartComplianceResult tree.
+    Compliance is determined by dummy logic and propagated upward.
+    """
+
+    # Check Part Compliance
+    is_compliant, violations, compliant_substances = check_part_compliance(
+        part, jurisdiction
+    )
+
+    # Traverse Children
+    bom_results: list[PartComplianceResult] = []
+    if part.bom:
+        for child in part.bom:
+            child_result = dfs_part_traversal(child, jurisdiction)
+            bom_results.append(child_result)
+            if child_result.is_compliant is False:
+                is_compliant = False  # Propagate failure upward
+                # Append a violation with reason stating violation found in child
+
+    return PartComplianceResult(
+        part_id=part.id,
+        part_name=part.name,
+        jurisdiction_name=jurisdiction.name,
+        is_compliant=is_compliant,
+        violations=violations,
+        comliant_substances=compliant_substances,
+        bom_results=bom_results,
+    )
