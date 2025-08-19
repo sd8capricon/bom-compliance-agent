@@ -111,6 +111,28 @@ class Violation(BaseModel):
     )
 
 
+class CompliantSubstance(BaseModel):
+    """
+    Details of a substance that was checked and found compliant (no violation).
+    """
+
+    substance_name: str = Field(
+        ...,
+        description="The common/trivial name of the substance that is in violation.",
+    )
+    substance_iupac_name: str = Field(
+        ...,
+        description="The standard IUPAC name of the substance/compound (e.g. ethanoic acid for acetic acid) or the standard element symbol as per periodic table (e.g. 'Pb' for Lead)",
+    )
+    substance_concentration: Tolerance = Field(
+        ..., description="The measured concentration of the substance."
+    )
+    jurisdiction_tolerance: Tolerance = Field(
+        ...,
+        description="The allowed tolerance limit for the substance in the jurisdiction.",
+    )
+
+
 class PartComplianceResult(BaseModel):
     """
     The compliance check result for a single part within a specific jurisdiction.
@@ -127,6 +149,10 @@ class PartComplianceResult(BaseModel):
     )
     violations: list[Violation] = Field(
         [], description="A list of all compliance violations found."
+    )
+    comliant_substances: list[CompliantSubstance] = Field(
+        [],
+        description="A list of substances checked that were within limits (no violations).",
     )
     bom_results: list[PartComplianceResult] = Field(
         [], description="The compliance results for the sub-parts in the BOM."
