@@ -1,4 +1,3 @@
-import json
 import os
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_core.documents import Document
@@ -89,7 +88,7 @@ def main():
     # Open and load the JSON file
     part_path = os.path.join("data", "parts", "remote_controller.json")
     with open(part_path, "r", encoding="utf-8") as file:
-        part = json.load(file)
+        part = Part.model_validate_json(file.read())
     # Path to compliance document
     file_path = "./data/documents/RoHS.pdf"
 
