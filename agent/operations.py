@@ -126,6 +126,11 @@ def check_jurisdiction_part_compliance(
             )
         tolerance_condition = jurisidiction_substance.tolerance_condition
 
+        # if part_substance.value is None or jurisidiction_substance.value is None:
+
+        # if tolerance_condition == "gte":
+        #     if part_substance.value >= jurisidiction_substance.value:
+
     print(result)
 
     return is_compliant, violations, compliant_substances
