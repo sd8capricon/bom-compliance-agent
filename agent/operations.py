@@ -213,8 +213,8 @@ def check_compliance(
                 make_compliant(
                     part_substance,
                     jurisidiction_substance,
-                    ambiguous=True,
-                    note=f"Substance {jurisidiction_substance.name} passes the requirements of the given jurisdiction.",
+                    ambiguous=False,
+                    note=f"Substance {part_substance.name} passes the requirements of the given jurisdiction.",
                 )
             )
 
