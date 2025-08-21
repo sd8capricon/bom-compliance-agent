@@ -17,7 +17,6 @@ from schema import (
     Jurisdiction,
     JurisdictionPartComplianceResult,
     Part,
-    Substance,
     Tolerance,
     Violation,
 )
@@ -53,20 +52,26 @@ def get_substance_mappings(
     part: Part, jurisidiction: Jurisdiction
 ) -> list[SubstanceMapping]:
     """
-    Map the part substances to the substances in the jurisdiction
+    Generate mappings between a part's substances and a jurisdiction's regulated substances.
 
     Args:
-        part (Part): Substances belonging to Part
-        jurisidiction (Jurisdiction): Susbtance Tolerances of the Jurisdiction
+        part (Part): The part containing a list of substances to be evaluated.
+        jurisidiction (Jurisdiction): The jurisdiction specifying regulated substances
+            and their tolerances.
 
     Returns:
-        SubstanceMappings: Mapping between part susbtances and jurisdiction
+        list[SubstanceMapping]: A list of mappings connecting each part substance
+        to the appropriate jurisdiction substance, including tolerance details.
     """
 
+    # Parser to enforce structured output in the form of SubstanceMappings
     parser = PydanticOutputParser(pydantic_object=SubstanceMappings)
+    # Prepare the prompt template for jurisdiction-part substance mapping
     template = PromptTemplate.from_template(JURISDICTION_PART_SUBSTANCE_MAPPING)
+    # Chain: prompt -> LLM -> structured parser
     chain = template | llm | parser
 
+    # Invoke the chain with part and jurisdiction substances
     result: SubstanceMappings = chain.invoke(
         {
             "jurisidiction_substances": jurisidiction.substance_tolerances,
