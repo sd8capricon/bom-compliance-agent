@@ -34,14 +34,37 @@ ops = {
 
 
 def extract_jurisdiction(text: str) -> list[Jurisdiction]:
-    parser = PydanticOutputParser(pydantic_object=Jurisdictions)
-    template = PromptTemplate.from_template(JURISDICTION_SUBSTANCE_EXTRACTION)
-    chain = template | llm | parser
+    """
+    Extract jurisdictional substance regulations from raw text.
 
+    This function uses a language model with a structured output parser to identify
+    jurisdictions and their associated substance tolerances from unstructured text.
+    The extracted information is returned as a list of `Jurisdiction` objects.
+
+    Args:
+        text (str):
+            The input text containing information about jurisdictions and
+            their regulated substances.
+
+    Returns:
+        List[Jurisdiction]:
+            A list of jurisdiction objects, each containing the jurisdiction name
+            and its associated substance tolerances.
+            Returns an empty list if no jurisdictions are found.
+    """
+
+    # Initialize a parser that enforces output in the form of Jurisdictions
+    parser = PydanticOutputParser(pydantic_object=Jurisdictions)
+    # Load the extraction prompt template
+    template = PromptTemplate.from_template(JURISDICTION_SUBSTANCE_EXTRACTION)
+    # Chain: prompt -> LLM -> structured parser
+    chain = template | llm | parser
+    # Invoke the chain with the input text and parser formatting instructions
     result: Jurisdictions = chain.invoke(
         {"text": text, "format_instructions": parser.get_format_instructions()}
     )
 
+    # Return empty list if no jurisdiction were detected
     if not result.jurisdictions:
         return []
 
@@ -86,6 +109,34 @@ def get_substance_mappings(
 def check_compliance(
     mappings: list[SubstanceMapping],
 ) -> Tuple[list[Violation], list[CompliantSubstance]]:
+    """
+    Evaluate compliance of part substances against jurisdictional tolerances.
+
+    This function takes a list of `SubstanceMapping` objects (linking part substances
+    to jurisdiction substances) and checks whether each part substance complies
+    with the jurisdiction's defined tolerance limits. It categorizes results into:
+
+    - **Violations**: Substances that exceed or fail to meet the jurisdiction's tolerance.
+    - **CompliantSubstance**: Substances that comply, are ambiguous (due to missing
+      regulation or undefined tolerance condition), or have no jurisdiction match.
+
+    Args:
+        mappings (List[SubstanceMapping]):
+            A list of mappings between part substances and their corresponding
+            jurisdiction substances.
+
+    Raises:
+        ValueError: If a required value (concentration) for part or jurisdiction
+            substance is missing.
+        ValueError: If a required unit for part or jurisdiction substance is missing.
+        ValueError: If the jurisdiction substance value is undefined.
+        ValueError: If the jurisdiction substance unit is undefined.
+
+    Returns:
+        Tuple[List[Violation], List[CompliantSubstance]]:
+            - A list of violations explaining why each substance failed compliance.
+            - A list of compliant or ambiguous substances, including notes where relevant.
+    """
 
     violations: list[Violation] = []
     compliant_substances: list[CompliantSubstance] = []
@@ -95,6 +146,7 @@ def check_compliance(
         part_substance = mapping.part_substance
         jurisidiction_substance = mapping.jurisidiction_substance
 
+        # Case 1: No jurisdiction regulation for the given substance
         if jurisidiction_substance is None:
             compliant_substances.append(
                 CompliantSubstance(
@@ -114,7 +166,7 @@ def check_compliance(
             )
             continue
 
-        # Check Validity of the substances
+        # Case 2: Validate that both part and jurisdiction substances have values/units
         if part_substance.value is None:
             raise ValueError(f"{part_substance.name} part substance value is not known")
         if part_substance.unit is None:
@@ -128,7 +180,7 @@ def check_compliance(
                 f"{jurisidiction_substance.name} jurisdiction substance value is not known"
             )
 
-        # Convert part substance value and unit to match the units of the jursidiciont substance
+        # Case 3: Normalize units by converting part substance units to match jurisdiction units
         part_substance.value = UnitConverter.convert(
             part_substance.value,
             part_substance.unit,
@@ -136,11 +188,12 @@ def check_compliance(
         )
         part_substance.unit = jurisidiction_substance.unit
 
+        # Case 4: Retrieve tolerance condition operator (e.g., <=, >=, <, >)
         tolerance_condition = jurisidiction_substance.tolerance_condition
         check = ops.get(tolerance_condition) if tolerance_condition else None
 
-        if check is None:  # Unknown Tolerance condition
-            # Ambigious Compliance
+        if check is None:
+            # No defined tolerance -> ambiguous compliance
             compliant_substances.append(
                 CompliantSubstance(
                     substance_name=part_substance.name,
@@ -160,7 +213,7 @@ def check_compliance(
                 )
             )
         elif check(part_substance.value, jurisidiction_substance.value):
-            # Violation
+            # Substance violates the jurisdiction tolerance
             if tolerance_condition == "gte":
                 violation_reason = f"Substance {part_substance.name} does not meet minimum requirements of the jurisdiction"
             else:
@@ -184,7 +237,7 @@ def check_compliance(
                 )
             )
         else:
-            # Compliant
+            # Substance complies with jurisdiction tolerance
             compliant_substances.append(
                 CompliantSubstance(
                     substance_name=part_substance.name,
