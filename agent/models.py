@@ -9,7 +9,7 @@ from typing import TypedDict
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 
-from schema import Jurisdiction, Part
+from schema import Jurisdiction, Part, Substance
 
 
 class ComplianceCheckAgentState(BaseModel):
@@ -45,17 +45,17 @@ class SubstanceMapping(BaseModel):
     and a substance defined in a jurisdiction's regulatory list.
     """
 
-    part_substance_standardized_name: str | None = Field(
-        None,
-        description="The standardized IUPAC name or elemental symbol of the substance "
-        "as identified in the part's composition. This is mapped to the "
-        "equivalent substance defined by the jurisdiction.",
+    part_substance: Substance = Field(
+        ...,
+        description="Substance found in the part. This is mapped to the standardized IUPAC name or elemental symbol equivalent substance defined by the jurisdiction.",
     )
-    jurisidiction_substance_standardized_name: str | None = Field(
+    jurisidiction_substance: Substance | None = Field(
         None,
-        description="The standardized IUPAC name or elemental symbol of the substance "
-        "as specified by the jurisdiction's regulatory requirements. "
-        "This is the target reference to which the part's substance is matched.",
+        description="Susbtance found in the jurisdiction's. This is the target reference to which the part's substance IUPAC name or elemental symbol is matched.",
+    )
+    is_comparable: bool = Field(
+        False,
+        description="Indicates whether part_substance and jurisdiction_substance can be meaningfully compared after converting part_substance values and units to the jurisdiction's standard. In other words, this is True if both represent the same physical quantity (e.g., mass, concentration).",
     )
 
 
