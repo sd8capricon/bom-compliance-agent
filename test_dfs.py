@@ -1,6 +1,7 @@
 import os
 
-from agent.operations import dfs_part_traversal
+from agent.models import SubstanceMapping, SubstanceMappings
+from agent.operations import check_compliance, dfs_part_traversal
 from schema import Jurisdiction, Part, Substance
 
 jurisdictions = [
@@ -116,8 +117,67 @@ jurisdictions = [
     )
 ]
 
-part_path = os.path.join("data", "parts", "remote_controller.json")
-with open(part_path, "r", encoding="utf-8") as file:
-    part = Part.model_validate_json(file.read())
+pcb_assy_001_mapping = SubstanceMappings(
+    mappings=[
+        SubstanceMapping(
+            part_substance=Substance(
+                name="Lead",
+                standardized_name="Pb",
+                value=0.009,
+                unit="mg/kg",
+                tolerance_condition=None,
+            ),
+            jurisidiction_substance=Substance(
+                name="Lead",
+                standardized_name="Pb",
+                value=0.1,
+                unit="%",
+                tolerance_condition="lte",
+            ),
+            is_comparable=True,
+        ),
+        SubstanceMapping(
+            part_substance=Substance(
+                name="Tin",
+                standardized_name="Sn",
+                value=99.9,
+                unit="%",
+                tolerance_condition=None,
+            ),
+            jurisidiction_substance=None,
+            is_comparable=False,
+        ),
+    ]
+)
+casting_001_mapping = SubstanceMappings(
+    mappings=[
+        SubstanceMapping(
+            part_substance=Substance(
+                name="Brominated Flame Retardants",
+                standardized_name="polybrominated diphenyl ethers",
+                value=0.005,
+                unit="mg/kg",
+                tolerance_condition=None,
+            ),
+            jurisidiction_substance=Substance(
+                name="Polybrominated diphenyl ethers",
+                standardized_name="PBDE",
+                value=0.1,
+                unit="%",
+                tolerance_condition="lte",
+            ),
+            is_comparable=True,
+        )
+    ]
+)
 
-report = dfs_part_traversal(part, jurisdictions[0])
+# part_path = os.path.join("data", "parts", "remote_controller.json")
+# with open(part_path, "r", encoding="utf-8") as file:
+#     part = Part.model_validate_json(file.read())
+
+# report = dfs_part_traversal(part, jurisdictions[0])
+
+res = check_compliance(pcb_assy_001_mapping.mappings)
+print(res)
+res = check_compliance(casting_001_mapping.mappings)
+print(res)
