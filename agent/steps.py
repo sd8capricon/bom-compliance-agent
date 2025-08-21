@@ -6,13 +6,16 @@ from schema import Jurisdiction, ComplianceReport
 
 
 def parse_pdf(state: ComplianceCheckAgentState) -> ComplianceCheckAgentState:
+    print("▶️ Starting: parse_pdf")
     loader = PyMuPDFLoader(state.file_path)
     docs = loader.load()
     state.pages = docs
+    print("✅ Completed: parse_pdf")
     return state
 
 
 def get_jurisdictions(state: ComplianceCheckAgentState) -> ComplianceCheckAgentState:
+    print("▶️ Starting: get_jurisdictions")
     jurisdictions_map: dict[str, Jurisdiction] = {}
     page_jurisdictions: list[Jurisdiction] = []
     for page in state.pages:
@@ -47,19 +50,15 @@ def get_jurisdictions(state: ComplianceCheckAgentState) -> ComplianceCheckAgentS
             )
 
     state.jurisdictions = list(jurisdictions_map.values())
+    print("✅ Completed: get_jurisdictions")
 
-    return state
-
-
-def convert_jurisdictions_to_si_units(
-    state: ComplianceCheckAgentState,
-) -> ComplianceCheckAgentState:
     return state
 
 
 def check_part_compliance(
     state: ComplianceCheckAgentState,
 ) -> ComplianceCheckAgentState:
+    print("▶️ Starting: check_part_compliance")
     for jurisdiction in state.jurisdictions:
         jurisdiction_part_compliance_result = dfs_part_traversal(
             state.part, jurisdiction
@@ -67,13 +66,16 @@ def check_part_compliance(
         state.jurisdiction_compliance_results.append(
             jurisdiction_part_compliance_result
         )
+    print("✅ Completed: check_part_compliance")
     return state
 
 
 def build_report(state: ComplianceCheckAgentState):
+    print("▶️ Starting: build_report")
     state.compliance_report = ComplianceReport(
         name=state.report_name,
         jurisdictions=state.jurisdictions,
         jurisdiction_compliance_results=state.jurisdiction_compliance_results,
     )
+    print("✅ Completed: build_report")
     return state
