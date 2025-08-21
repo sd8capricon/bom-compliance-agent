@@ -137,6 +137,10 @@ class CompliantSubstance(BaseModel):
         ...,
         description="The allowed tolerance limit for the substance in the jurisdiction.",
     )
+    is_ambiguous: bool = Field(
+        False,
+        description="If the substanc's compliance cannot be determined for certain",
+    )
     note: str = Field(
         ..., description="Extra commentary on the compliance of the substance"
     )
