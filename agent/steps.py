@@ -2,7 +2,7 @@ from langchain_community.document_loaders import PyMuPDFLoader
 
 from agent.models import ComplianceCheckAgentState
 from agent.operations import dfs_part_traversal, extract_jurisdiction
-from schema import Jurisdiction
+from schema import Jurisdiction, ComplianceReport
 
 
 def parse_pdf(state: ComplianceCheckAgentState) -> ComplianceCheckAgentState:
@@ -61,7 +61,19 @@ def check_part_compliance(
     state: ComplianceCheckAgentState,
 ) -> ComplianceCheckAgentState:
     for jurisdiction in state.jurisdictions:
-        jurisdiction_part_compliance_report = dfs_part_traversal(
+        jurisdiction_part_compliance_result = dfs_part_traversal(
             state.part, jurisdiction
         )
+        state.jurisdiction_compliance_results.append(
+            jurisdiction_part_compliance_result
+        )
+    return state
+
+
+def build_report(state: ComplianceCheckAgentState):
+    state.compliance_report = ComplianceReport(
+        name=state.report_name,
+        jurisdictions=state.jurisdictions,
+        jurisdiction_compliance_results=state.jurisdiction_compliance_results,
+    )
     return state

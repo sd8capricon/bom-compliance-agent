@@ -13,9 +13,21 @@ def main():
     # Path to compliance document
     file_path = "./data/documents/RoHS.pdf"
 
-    agent_state = ComplianceCheckAgentState(file_path=file_path, part=part)
-    res = ComplianceCheckAgentState.model_validate(agent.invoke(agent_state))
-    print(res.jurisdictions)
+    agent_state = ComplianceCheckAgentState(
+        file_path=file_path,
+        part=part,
+        report_name="RoHs Compliance Report for Remote Controller",
+    )
+    agent_state = ComplianceCheckAgentState.model_validate(agent.invoke(agent_state))
+
+    # Save final state as JSON
+    output_path = os.path.join("data", "results", "agent_state.json")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(agent_state.model_dump_json(indent=2))
+
+    print(f"✅ Agent state saved to {output_path}")
 
 
 if __name__ == "__main__":
