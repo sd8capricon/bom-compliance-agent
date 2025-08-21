@@ -12,6 +12,7 @@ from agent.prompts import (
     JURISDICTION_SUBSTANCE_EXTRACTION,
 )
 from agent.utils.unit_converter import UnitConverter
+from agent.utils.compliance_utils import make_compliant, make_violation
 from schema import (
     CompliantSubstance,
     Jurisdiction,
@@ -149,19 +150,11 @@ def check_compliance(
         # Case 1: No jurisdiction regulation for the given substance
         if jurisidiction_substance is None:
             compliant_substances.append(
-                CompliantSubstance(
-                    substance_name=part_substance.name,
-                    substance_standard_name=part_substance.standardized_name,
-                    substance_concentration=Tolerance(
-                        value=part_substance.value,
-                        unit=part_substance.unit,
-                        tolerance_condition=None,
-                    ),
-                    jurisdiction_tolerance=Tolerance(
-                        value=None, unit=None, tolerance_condition=None
-                    ),
-                    is_ambiguous=True,
-                    note=f"No regulation for {part_substance.name} was not found in the given jurisdiction",
+                make_compliant(
+                    part_substance,
+                    None,
+                    True,
+                    note=f"No regulation for {part_substance.name} was found in the given jurisdiction",
                 )
             )
             continue
@@ -195,20 +188,10 @@ def check_compliance(
         if check is None:
             # No defined tolerance -> ambiguous compliance
             compliant_substances.append(
-                CompliantSubstance(
-                    substance_name=part_substance.name,
-                    substance_standard_name=part_substance.standardized_name,
-                    substance_concentration=Tolerance(
-                        value=part_substance.value,
-                        unit=part_substance.unit,
-                        tolerance_condition=None,
-                    ),
-                    jurisdiction_tolerance=Tolerance(
-                        value=jurisidiction_substance.value,
-                        unit=jurisidiction_substance.unit,
-                        tolerance_condition=None,
-                    ),
-                    is_ambiguous=True,
+                make_compliant(
+                    part_substance,
+                    jurisidiction_substance,
+                    ambiguous=True,
                     note=f"{jurisidiction_substance.name} does not have any specified tolerance in the given jurisdiction",
                 )
             )
@@ -220,40 +203,18 @@ def check_compliance(
                 violation_reason = f"Substance {part_substance.name} exceeds permisible limits of the jurisdiction"
 
             violations.append(
-                Violation(
-                    substance_name=part_substance.name,
-                    substance_standard_name=part_substance.standardized_name,
-                    substance_concentration=Tolerance(
-                        value=part_substance.value,
-                        unit=part_substance.unit,
-                        tolerance_condition=None,
-                    ),
-                    jurisdiction_tolerance=Tolerance(
-                        value=jurisidiction_substance.value,
-                        unit=jurisidiction_substance.unit,
-                        tolerance_condition=None,
-                    ),
-                    violation_reason=violation_reason,
+                make_violation(
+                    part_substance, jurisidiction_substance, violation_reason
                 )
             )
         else:
             # Substance complies with jurisdiction tolerance
             compliant_substances.append(
-                CompliantSubstance(
-                    substance_name=part_substance.name,
-                    substance_standard_name=part_substance.standardized_name,
-                    substance_concentration=Tolerance(
-                        value=part_substance.value,
-                        unit=part_substance.unit,
-                        tolerance_condition=None,
-                    ),
-                    jurisdiction_tolerance=Tolerance(
-                        value=jurisidiction_substance.value,
-                        unit=jurisidiction_substance.unit,
-                        tolerance_condition=None,
-                    ),
-                    is_ambiguous=True,
-                    note=f"Substance {jurisidiction_substance.name} passes the requirementes of the given jurisdiction.",
+                make_compliant(
+                    part_substance,
+                    jurisidiction_substance,
+                    ambiguous=True,
+                    note=f"Substance {jurisidiction_substance.name} passes the requirements of the given jurisdiction.",
                 )
             )
 
