@@ -163,7 +163,7 @@ class JurisdictionPartComplianceResult(BaseModel):
     violations: list[Violation] = Field(
         [], description="A list of all compliance violations found."
     )
-    comliant_substances: list[CompliantSubstance] = Field(
+    compliant_substances: list[CompliantSubstance] = Field(
         [],
         description="A list of substances checked that were within limits (no violations).",
     )

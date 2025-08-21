@@ -279,6 +279,6 @@ def dfs_part_traversal(
         jurisdiction_name=jurisdiction.name,
         is_compliant=is_compliant,
         violations=violations,
-        comliant_substances=compliant_substances,
+        compliant_substances=compliant_substances,
         bom_results=bom_results,
     )
