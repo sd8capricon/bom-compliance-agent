@@ -190,7 +190,7 @@
         },
         {
           "name": "Regulation (EC) No 1907/2006",
-          "standardized_name": "1907/2006",
+          "standardized_name": "Regulation (EC) No 1907/2006",
           "value": null,
           "unit": null,
           "tolerance_condition": null
@@ -233,7 +233,7 @@
       "jurisdiction_name": "European Union",
       "is_compliant": true,
       "violations": [],
-      "comliant_substances": [],
+      "compliant_substances": [],
       "bom_results": [
         {
           "part_id": "PCB-ASSY-001",
@@ -241,7 +241,7 @@
           "jurisdiction_name": "European Union",
           "is_compliant": true,
           "violations": [],
-          "comliant_substances": [
+          "compliant_substances": [
             {
               "substance_name": "Lead",
               "substance_standard_name": "Pb",
@@ -283,7 +283,7 @@
           "jurisdiction_name": "European Union",
           "is_compliant": true,
           "violations": [],
-          "comliant_substances": [
+          "compliant_substances": [
             {
               "substance_name": "Brominated Flame Retardants",
               "substance_standard_name": "polybrominated diphenyl ethers",
@@ -384,7 +384,7 @@
           },
           {
             "name": "Regulation (EC) No 1907/2006",
-            "standardized_name": "1907/2006",
+            "standardized_name": "Regulation (EC) No 1907/2006",
             "value": null,
             "unit": null,
             "tolerance_condition": null
@@ -427,7 +427,7 @@
         "jurisdiction_name": "European Union",
         "is_compliant": true,
         "violations": [],
-        "comliant_substances": [],
+        "compliant_substances": [],
         "bom_results": [
           {
             "part_id": "PCB-ASSY-001",
@@ -435,7 +435,7 @@
             "jurisdiction_name": "European Union",
             "is_compliant": true,
             "violations": [],
-            "comliant_substances": [
+            "compliant_substances": [
               {
                 "substance_name": "Lead",
                 "substance_standard_name": "Pb",
@@ -477,7 +477,7 @@
             "jurisdiction_name": "European Union",
             "is_compliant": true,
             "violations": [],
-            "comliant_substances": [
+            "compliant_substances": [
               {
                 "substance_name": "Brominated Flame Retardants",
                 "substance_standard_name": "polybrominated diphenyl ethers",
