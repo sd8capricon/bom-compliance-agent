@@ -9,14 +9,23 @@ from typing import TypedDict
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 
-from schema import Jurisdiction, Part, Substance
+from schema import (
+    Jurisdiction,
+    JurisdictionPartComplianceResult,
+    Part,
+    Substance,
+    ComplianceReport,
+)
 
 
 class ComplianceCheckAgentState(BaseModel):
+    report_name: str
+    part: Part
     file_path: str
     pages: list[Document] = []
     jurisdictions: list[Jurisdiction] = []
-    part: Part
+    jurisdiction_compliance_results: list[JurisdictionPartComplianceResult] = []
+    compliance_report: ComplianceReport | None = None
 
 
 class Jurisdictions(BaseModel):
