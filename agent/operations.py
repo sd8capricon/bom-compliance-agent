@@ -11,8 +11,8 @@ from agent.prompts import (
     JURISDICTION_PART_SUBSTANCE_MAPPING,
     JURISDICTION_SUBSTANCE_EXTRACTION,
 )
-from agent.utils.unit_converter import UnitConverter
 from agent.utils.compliance_utils import make_compliant, make_violation
+from agent.utils.unit_converter import UnitConverter
 from schema import (
     CompliantSubstance,
     Jurisdiction,
@@ -225,8 +225,30 @@ def dfs_part_traversal(
     part: Part, jurisdiction: Jurisdiction
 ) -> JurisdictionPartComplianceResult:
     """
-    DFS traversal that builds a PartComplianceResult tree.
-    Compliance is determined by check_jurisdiction_part_compliance and propagated upward.
+    Performs a depth-first traversal of a part and its bill of materials (BOM)
+    to evaluate compliance with a given jurisdiction's substance regulations.
+
+    The function checks whether the part contains regulated substances,
+    determines compliance status, and propagates compliance/violation
+    results upward from its children in the BOM.
+
+    Args:
+        part (Part):
+            The part to evaluate, including its substances and any child parts
+            defined in its BOM.
+        jurisdiction (Jurisdiction):
+            The regulatory jurisdiction whose compliance rules should be
+            applied when evaluating the part and its children.
+
+    Returns:
+        JurisdictionPartComplianceResult:
+            An object containing:
+            - `part_id` and `part_name` of the evaluated part
+            - `jurisdiction_name` used for compliance evaluation
+            - `is_compliant`: overall compliance status of this part and its BOM
+            - `violations`: list of violations found in this part
+            - `compliant_substances`: substances explicitly verified as compliant
+            - `bom_results`: compliance results for each child part in the BOM
     """
 
     if part.substances:
