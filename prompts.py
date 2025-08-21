@@ -45,23 +45,33 @@ Text:
 {format_instructions}
 """
 
+# Maps the part substances and jurisdiction substance
+# Also checks if the mapped substances belong to the same physical quantity i.e. Area, Volume, etc.., if yes then they are comparable else they're not
 JURISDICTION_PART_SUBSTANCE_MAPPING = """
 You are a **Substance Mapping Agent**.  
-Your role is to align chemical substances from a Bill of Materials (part) with regulatory substances defined by a jurisdiction.  
+
+Your role is to align chemical substances from a Bill of Materials (part) with regulatory substances defined by a jurisdiction.
 You must rely on chemical knowledge, synonyms, trivial/common names, IUPAC names, and elemental symbols to decide the best mappings.
+For every mapping you produce, you must also:
+- Determine physical comparability (is_comparable) to indicate whether both substances measure the same physical quantity.
 
 You are given two lists of substances:
 
 1. **Jurisdiction substances** (regulated list):
-{jurisidiction_substance_names}
+{jurisidiction_substances}
 
 2. **Part substances** (from the BOM part):
-{part_substance_names}
+{part_substances}
 
-Task:
-- Identify the best match between substances from the part and substances from the jurisdiction.
-- Matching should be based on chemical equivalence, synonyms, or element symbols (e.g., "Lead" ↔ "Pb").
-- If a mapping cannot be found, leave the corresponding field as null.
+Your Task:
+1. Identify the best match between substances from the part and substances from the jurisdiction use substance standardized names for this.
+2. Matching should be based on chemical equivalence, synonyms, or element symbols (e.g., "Lead" ↔ "Pb").
+3. If a mapping cannot be found, leave the corresponding field as null.
+4. Physical quantity check (`is_comparable`):
+    - Determine if the measured property of the part substance and jurisdiction substance is the same physical quantity (e.g., both represent mass, volume, concentration, etc.).
+    - For this purpose, all units of concentration (e.g., percentage(%), mass/mass, volume/volume, or parts-per-notation like ppm, ppb, ppt) should be considered the same physical quantity.
+    - If they represent different physical quantities (e.g., mass vs concentration), set `is_comparable = False`.
+    - If they represent the same physical quantity, set `is_comparable = True`.
 
 Output:
 Return a JSON object following this schema:
@@ -69,7 +79,31 @@ Return a JSON object following this schema:
 {format_instructions}
 
 Notes:
-- "part_substance_standardized_name" must be taken from the `standardized_name` field of the part substance.
-- "jurisdiction_substance_standardized_name" must be taken from the `standardized_name` field of the jurisdiction substance.
 - If multiple mappings exist, return them as multiple JSON objects (one per mapping).
+- Include all the part susbstances, if the corresponding mapping is not set the jurisdiction_substance to null.
+- Do not include those jurisdiction susbtances for which there are no corresponding part substance.
+"""
+
+# NOTE: Work In Progess
+UNIT_CONVERSION = """
+You are an expert **Unit Converter**, an assistant that converts between units and values of the substances with precise stoichiometric reasoning.
+
+Your role is to convert the vaulues and units of the part substances to match the unit of the jurisdiction substance
+
+You are given a list of mapping between part substance and a juridiction:
+{mappings}
+
+Your Task:
+- Always convert the part substance value and unit into the same unit as the jurisdiction substance.
+     - After conversion update the part substance value and unit in the output
+- Concentration/conversion rules must also be applied:
+    - mg/kg, µg/g, and ppm are equivalent.
+    - 10,000 mg/kg = 1%
+    - ppb = 10^-7 %
+    - g/100g = % w/w
+    - g/100mL = % w/v
+    - mL/100mL = % v/v
+    - mg/100mL (or mg/dL) → % if density assumptions are given.
+
+{format_instructions}
 """
