@@ -183,7 +183,7 @@ class ComplianceReport(BaseModel):
     jurisdictions: list[Jurisdiction] = Field(
         ..., description="A list of all jurisdictions checked in the report."
     )
-    top_level_part_result: JurisdictionPartComplianceResult = Field(
+    jurisdiction_compliance_results: list[JurisdictionPartComplianceResult] = Field(
         ...,
-        description="The compliance result for the main part being analyzed, including all nested results.",
+        description="Compliance result of the part for each jurisdiction.",
     )
