@@ -1,3 +1,4 @@
+from operator import gt, lt
 from typing import Tuple
 
 from dotenv import load_dotenv
@@ -5,7 +6,8 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
 
-from agent.models import Jurisdictions, SubstanceMappings, SubstanceNamePair
+from agent.models import Jurisdictions, SubstanceMapping, SubstanceMappings
+from agent.utils.unit_converter import UnitConverter
 from prompts import (
     JURISDICTION_PART_SUBSTANCE_MAPPING,
     JURISDICTION_SUBSTANCE_EXTRACTION,
@@ -25,6 +27,12 @@ load_dotenv()
 MODEL = "gemma-3-4b-it"
 llm = ChatGoogleGenerativeAI(model=MODEL, temperature=0.25)
 
+ops = {
+    "gte": lt,  # violation if part < jurisdiction
+    "lte": gt,  # violation if part > jurisdiction
+    "eq": lambda a, b: a != b,  # violation if unequal
+}
+
 
 def extract_jurisdiction(text: str) -> list[Jurisdiction]:
     parser = PydanticOutputParser(pydantic_object=Jurisdictions)
@@ -35,69 +43,54 @@ def extract_jurisdiction(text: str) -> list[Jurisdiction]:
         {"text": text, "format_instructions": parser.get_format_instructions()}
     )
 
-    if result.jurisdictions == None:
+    if not result.jurisdictions:
         return []
 
     return [juridiction for juridiction in result.jurisdictions]
 
 
-# Dummy Function to check part compliance in a jurisdiction
-def check_jurisdiction_part_compliance(
+def get_substance_mappings(
     part: Part, jurisidiction: Jurisdiction
-) -> Tuple[bool, list[Violation], list[CompliantSubstance]]:
+) -> list[SubstanceMapping]:
+    """
+    Map the part substances to the substances in the jurisdiction
 
-    # Check if part has substances
-    # Find 1:1 mapping
-    # Compare the tolerances
-    # Repeat Recusively
+    Args:
+        part (Part): Substances belonging to Part
+        jurisidiction (Jurisdiction): Susbtance Tolerances of the Jurisdiction
 
-    jurisidiction_substance_names: list[SubstanceNamePair] = [
-        {"name": substance.name, "standardized_name": substance.standardized_name}
-        for substance in jurisidiction.substance_tolerances
-    ]
-    part_substance_names: list[SubstanceNamePair] = [
-        {"name": substance.name, "standardized_name": substance.standardized_name}
-        for substance in part.substances
-    ]
+    Returns:
+        SubstanceMappings: Mapping between part susbtances and jurisdiction
+    """
 
     parser = PydanticOutputParser(pydantic_object=SubstanceMappings)
     template = PromptTemplate.from_template(JURISDICTION_PART_SUBSTANCE_MAPPING)
     chain = template | llm | parser
 
-    is_compliant = True
-    violations: list[Violation] = []
-    compliant_substances: list[CompliantSubstance] = []
-
-    if not part_substance_names:
-        return is_compliant, violations, compliant_substances
-
     result: SubstanceMappings = chain.invoke(
         {
-            "jurisidiction_substance_names": jurisidiction_substance_names,
-            "part_substance_names": part_substance_names,
+            "jurisidiction_substances": jurisidiction.substance_tolerances,
+            "part_substances": part.substances,
             "format_instructions": parser.get_format_instructions(),
         }
     )
 
-    mappings = result.mappings
+    return result.mappings
+
+
+def check_compliance(
+    mappings: list[SubstanceMapping],
+) -> Tuple[list[Violation], list[CompliantSubstance]]:
+
+    violations: list[Violation] = []
+    compliant_substances: list[CompliantSubstance] = []
 
     for mapping in mappings:
-        if not mapping.part_substance_standardized_name:
-            # Skip the substances which the part doesn't have
-            continue
 
-        part_substance = Substance.find_by_standard_name(
-            part.substances, mapping.part_substance_standardized_name
-        )
+        part_substance = mapping.part_substance
+        jurisidiction_substance = mapping.jurisidiction_substance
 
-        if part_substance is None:
-            raise ValueError(
-                f"Invalid substance in part, substance with standard name {mapping.part_substance_standardized_name} not found in part {part.name}"
-            )
-
-        if not mapping.jurisidiction_substance_standardized_name:
-            # Mark as compliant
-            # Note that jurisdiction didn't specify anything related to this
+        if jurisidiction_substance is None:
             compliant_substances.append(
                 CompliantSubstance(
                     substance_name=part_substance.name,
@@ -110,30 +103,103 @@ def check_jurisdiction_part_compliance(
                     jurisdiction_tolerance=Tolerance(
                         value=None, unit=None, tolerance_condition=None
                     ),
-                    note=f"The jurisdiction - {jurisidiction.name}, didn't specify this substance or their tolerances",
+                    is_ambiguous=True,
+                    note=f"No regulation for {part_substance.name} was not found in the given jurisdiction",
                 )
             )
             continue
 
-        jurisidiction_substance = Substance.find_by_standard_name(
-            jurisidiction.substance_tolerances,
-            mapping.jurisidiction_substance_standardized_name,
-        )
-
-        if jurisidiction_substance is None:
+        # Check Validity of the substances
+        if part_substance.value is None:
+            raise ValueError(f"{part_substance.name} part substance value is not known")
+        if part_substance.unit is None:
+            raise ValueError(f"{part_substance.unit} part substance unit is not known")
+        if jurisidiction_substance.value is None:
             raise ValueError(
-                f"Invalid substance in jurisdiction, substance with standard name {mapping.jurisidiction_substance_standardized_name} not found in part {jurisidiction.name}"
+                f"{jurisidiction_substance.name} jurisdiction substance value is not known"
             )
+        if jurisidiction_substance.unit is None:
+            raise ValueError(
+                f"{jurisidiction_substance.name} jurisdiction substance value is not known"
+            )
+
+        # Convert part substance value and unit to match the units of the jursidiciont substance
+        part_substance.value = UnitConverter.convert(
+            part_substance.value,
+            part_substance.unit,
+            jurisidiction_substance.unit,
+        )
+        part_substance.unit = jurisidiction_substance.unit
+
         tolerance_condition = jurisidiction_substance.tolerance_condition
+        check = ops.get(tolerance_condition) if tolerance_condition else None
 
-        # if part_substance.value is None or jurisidiction_substance.value is None:
+        if check is None:  # Unknown Tolerance condition
+            # Ambigious Compliance
+            compliant_substances.append(
+                CompliantSubstance(
+                    substance_name=part_substance.name,
+                    substance_standard_name=part_substance.standardized_name,
+                    substance_concentration=Tolerance(
+                        value=part_substance.value,
+                        unit=part_substance.unit,
+                        tolerance_condition=None,
+                    ),
+                    jurisdiction_tolerance=Tolerance(
+                        value=jurisidiction_substance.value,
+                        unit=jurisidiction_substance.unit,
+                        tolerance_condition=None,
+                    ),
+                    is_ambiguous=True,
+                    note=f"{jurisidiction_substance.name} does not have any specified tolerance in the given jurisdiction",
+                )
+            )
+        elif check(part_substance.value, jurisidiction_substance.value):
+            # Violation
+            if tolerance_condition == "gte":
+                violation_reason = f"Substance {part_substance.name} does not meet minimum requirements of the jurisdiction"
+            else:
+                violation_reason = f"Substance {part_substance.name} exceeds permisible limits of the jurisdiction"
 
-        # if tolerance_condition == "gte":
-        #     if part_substance.value >= jurisidiction_substance.value:
+            violations.append(
+                Violation(
+                    substance_name=part_substance.name,
+                    substance_standard_name=part_substance.standardized_name,
+                    substance_concentration=Tolerance(
+                        value=part_substance.value,
+                        unit=part_substance.unit,
+                        tolerance_condition=None,
+                    ),
+                    jurisdiction_tolerance=Tolerance(
+                        value=jurisidiction_substance.value,
+                        unit=jurisidiction_substance.unit,
+                        tolerance_condition=None,
+                    ),
+                    violation_reason=violation_reason,
+                )
+            )
+        else:
+            # Compliant
+            compliant_substances.append(
+                CompliantSubstance(
+                    substance_name=part_substance.name,
+                    substance_standard_name=part_substance.standardized_name,
+                    substance_concentration=Tolerance(
+                        value=part_substance.value,
+                        unit=part_substance.unit,
+                        tolerance_condition=None,
+                    ),
+                    jurisdiction_tolerance=Tolerance(
+                        value=jurisidiction_substance.value,
+                        unit=jurisidiction_substance.unit,
+                        tolerance_condition=None,
+                    ),
+                    is_ambiguous=True,
+                    note=f"Substance {jurisidiction_substance.name} passes the requirementes of the given jurisdiction.",
+                )
+            )
 
-    print(result)
-
-    return is_compliant, violations, compliant_substances
+    return violations, compliant_substances
 
 
 def dfs_part_traversal(
@@ -144,10 +210,17 @@ def dfs_part_traversal(
     Compliance is determined by check_jurisdiction_part_compliance and propagated upward.
     """
 
-    # Check Part Compliance
-    is_compliant, violations, compliant_substances = check_jurisdiction_part_compliance(
-        part, jurisdiction
-    )
+    if part.substances:
+        # Get Part Substance and Jurisdiction Substance Mappings
+        mappings: list[SubstanceMapping] = get_substance_mappings(part, jurisdiction)
+
+        # Check Part Compliance
+        violations, compliant_substances = check_compliance(mappings)
+        is_compliant = True if not violations else False
+    else:
+        is_compliant = True
+        violations: list[Violation] = []
+        compliant_substances: list[CompliantSubstance] = []
 
     # Traverse Children
     bom_results: list[JurisdictionPartComplianceResult] = []
