@@ -1,33 +1,48 @@
-import os
-
-from agent.models import ComplianceCheckAgentState
-from agent.workflow import agent
-from schema import Part
+import streamlit as st
+from utils import run_agent, generate_markdown_result
 
 
 def main():
-    # Open and load the JSON file
-    part_path = os.path.join("data", "parts", "remote_controller.json")
-    with open(part_path, "r", encoding="utf-8") as file:
-        part = Part.model_validate_json(file.read())
-    # Path to compliance document
-    file_path = "./data/documents/RoHS.pdf"
+    st.title("⚖️ Compliance Check Agent")
 
-    agent_state = ComplianceCheckAgentState(
-        file_path=file_path,
-        part=part,
-        report_name="RoHs Compliance Report for Remote Controller",
+    st.write(
+        "Upload a **Part JSON** file and a **Regulation PDF** to run the compliance check."
     )
-    agent_state = ComplianceCheckAgentState.model_validate(agent.invoke(agent_state))
 
-    # Save final state as JSON
-    output_path = os.path.join("data", "results", "agent_state.json")
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    part_file = st.file_uploader("Upload Part JSON", type=["json"])
+    pdf_file = st.file_uploader("Upload Regulation PDF", type=["pdf"])
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(agent_state.model_dump_json(indent=2))
+    if part_file and pdf_file:
+        if st.button("Run Compliance Check"):
+            with st.spinner("Running agent... please wait."):
+                agent_state = run_agent(part_file, pdf_file)
 
-    print(f"✅ Agent state saved to {output_path}")
+                st.success("✅ Agent finished!")
+                st.json(agent_state.model_dump())
+
+                # Option to download agent JSON result
+                result_json = agent_state.model_dump_json(indent=2)
+                st.download_button(
+                    label="📥 Download Result JSON",
+                    data=result_json,
+                    file_name="agent_state.json",
+                    mime="application/json",
+                )
+
+            # Spinner for markdown generation
+            with st.spinner("Generating markdown report..."):
+                markdown_report = generate_markdown_result(agent_state)
+
+                st.success("📝 Markdown report generated!")
+                st.markdown(markdown_report)
+
+                # Option to download the markdown report
+                st.download_button(
+                    label="📥 Download Report Markdown",
+                    data=markdown_report,
+                    file_name="compliance_report.md",
+                    mime="text/markdown",
+                )
 
 
 if __name__ == "__main__":
