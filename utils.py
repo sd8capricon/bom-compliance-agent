@@ -18,6 +18,8 @@ def run_agent(part_file, pdf_file):
     # Parse Part JSON
     part = Part.model_validate_json(part_file.read().decode("utf-8"))
 
+    print(f"Running Agent for part: {part.name}")
+
     # Save uploaded PDF temporarily
     pdf_path = os.path.join("temp", "temp_regulation.pdf")
     os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
@@ -55,8 +57,6 @@ def generate_markdown_result(compliance_report: ComplianceReport) -> str:
     template = PromptTemplate.from_template(MARKDOWN)
     print("▶️ Starting: generate_markdown_report")
     chain = template | llm
-    result: AIMessage = chain.invoke(
-        {"json_report": compliance_report.jurisdiction_compliance_results}
-    )
+    result: AIMessage = chain.invoke({"json_report": compliance_report})
     print("✅ Completed: generate_markdown_report")
     return result.content
