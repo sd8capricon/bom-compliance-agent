@@ -1,6 +1,6 @@
 import os
 
-from agent.models import SubstanceMapping, SubstanceMappings
+from agent.models import SubstanceMapping, SubstanceMappingList
 from agent.operations import check_compliance, dfs_part_traversal
 from schema import Jurisdiction, Part, Substance
 
@@ -117,7 +117,7 @@ jurisdictions = [
     )
 ]
 
-pcb_assy_001_mapping = SubstanceMappings(
+pcb_assy_001_mapping = SubstanceMappingList(
     mappings=[
         SubstanceMapping(
             part_substance=Substance(
@@ -149,7 +149,7 @@ pcb_assy_001_mapping = SubstanceMappings(
         ),
     ]
 )
-casting_001_mapping = SubstanceMappings(
+casting_001_mapping = SubstanceMappingList(
     mappings=[
         SubstanceMapping(
             part_substance=Substance(

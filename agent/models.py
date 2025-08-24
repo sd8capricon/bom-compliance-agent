@@ -10,11 +10,11 @@ from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 
 from schema import (
+    ComplianceReport,
     Jurisdiction,
     JurisdictionPartComplianceResult,
     Part,
     Substance,
-    ComplianceReport,
 )
 
 
@@ -68,7 +68,8 @@ class SubstanceMapping(BaseModel):
     )
 
 
-class SubstanceMappings(BaseModel):
+class SubstanceMappingList(BaseModel):
     mappings: list[SubstanceMapping] = Field(
-        [], description="List of mappings between jurisdiction and part substances"
+        [],
+        description="List of mappings (list[SubstanceMapping]) between jurisdiction and part substances",
     )
