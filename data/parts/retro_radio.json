@@ -9,8 +9,15 @@
             "substances": [
                 {
                     "name": "Steel",
+                    "standardized_name": "Steel (alloy)",
                     "value": 2.5,
                     "unit": "kg"
+                },
+                {
+                    "name": "Cadmium",
+                    "standardized_name": "Cd",
+                    "value": 170.0,
+                    "unit": "mg/kg"
                 }
             ]
         },
@@ -20,11 +27,13 @@
             "substances": [
                 {
                     "name": "Lead",
-                    "value": 150.0,
+                    "standardized_name": "Pb",
+                    "value": 1500.0,
                     "unit": "mg/kg"
                 },
                 {
                     "name": "Plastic",
+                    "standardized_name": "Plastic (Polymer)",
                     "value": 50.0,
                     "unit": "g"
                 }
