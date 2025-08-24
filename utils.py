@@ -53,8 +53,10 @@ def generate_markdown_result(compliance_report: ComplianceReport) -> str:
     MODEL = "gemini-2.5-flash"
     llm = ChatGoogleGenerativeAI(model=MODEL, temperature=0.5)
     template = PromptTemplate.from_template(MARKDOWN)
+    print("▶️ Starting: generate_markdown_report")
     chain = template | llm
     result: AIMessage = chain.invoke(
         {"json_report": compliance_report.jurisdiction_compliance_results}
     )
+    print("✅ Completed: generate_markdown_report")
     return result.content
