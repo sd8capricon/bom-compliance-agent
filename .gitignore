@@ -60,5 +60,8 @@ dmypy/
 # Sphinx documentation
 docs/_build/
 
+# Temporary files
+temp/
+
 # macOS system files
 .DS_Store
