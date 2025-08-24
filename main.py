@@ -31,7 +31,9 @@ def main():
 
             # Spinner for markdown generation
             with st.spinner("Generating markdown report..."):
-                markdown_report = generate_markdown_result(agent_state)
+                markdown_report = generate_markdown_result(
+                    agent_state.compliance_report
+                )
 
                 st.success("📝 Markdown report generated!")
                 st.markdown(markdown_report)
