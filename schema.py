@@ -65,7 +65,12 @@ class Jurisdiction(BaseModel):
     """
 
     name: str = Field(
-        ..., description="The name of the jurisdiction (e.g., 'RoHS', 'REACH')."
+        ...,
+        description="The full, official name of the jurisdiction. (e.g. European Union', 'United States of America', or 'Japan'.).",
+    )
+    abbreviation: str = Field(
+        ...,
+        description="The common, abbreviated code for the jurisdiction. (e.g. 'EU', 'USA', or 'JP')",
     )
     substance_tolerances: list[Substance] = Field(
         [],
