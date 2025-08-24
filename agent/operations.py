@@ -6,7 +6,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
 
-from agent.models import Jurisdictions, SubstanceMapping, SubstanceMappings
+from agent.models import Jurisdictions, SubstanceMapping, SubstanceMappingList
 from agent.prompts import (
     JURISDICTION_PART_SUBSTANCE_MAPPING,
     JURISDICTION_SUBSTANCE_EXTRACTION,
@@ -18,7 +18,6 @@ from schema import (
     Jurisdiction,
     JurisdictionPartComplianceResult,
     Part,
-    Tolerance,
     Violation,
 )
 
@@ -69,6 +68,8 @@ def extract_jurisdiction(text: str) -> list[Jurisdiction]:
     if not result.jurisdictions:
         return []
 
+    print(result.jurisdictions)
+
     return [juridiction for juridiction in result.jurisdictions]
 
 
@@ -89,14 +90,14 @@ def get_substance_mappings(
     """
 
     # Parser to enforce structured output in the form of SubstanceMappings
-    parser = PydanticOutputParser(pydantic_object=SubstanceMappings)
+    parser = PydanticOutputParser(pydantic_object=SubstanceMappingList)
     # Prepare the prompt template for jurisdiction-part substance mapping
     template = PromptTemplate.from_template(JURISDICTION_PART_SUBSTANCE_MAPPING)
     # Chain: prompt -> LLM -> structured parser
     chain = template | llm | parser
 
     # Invoke the chain with part and jurisdiction substances
-    result: SubstanceMappings = chain.invoke(
+    result: SubstanceMappingList = chain.invoke(
         {
             "jurisidiction_substances": jurisidiction.substance_tolerances,
             "part_substances": part.substances,
@@ -144,6 +145,8 @@ def check_compliance(
 
     for mapping in mappings:
 
+        print(mapping)
+
         part_substance = mapping.part_substance
         jurisidiction_substance = mapping.jurisidiction_substance
 
@@ -159,21 +162,50 @@ def check_compliance(
             )
             continue
 
-        # Case 2: Validate that both part and jurisdiction substances have values/units
+        # Case 2: Part and Jurisdiction susbtances are not comparable
+        if not mapping.is_comparable:
+            compliant_substances.append(
+                make_compliant(
+                    part_substance,
+                    jurisidiction_substance,
+                    True,
+                    note=f"The part substance ({part_substance.name}, {part_substance.value}{part_substance.unit}) and the jurisdiction substance ({jurisidiction_substance.name}, {jurisidiction_substance.value}{jurisidiction_substance.unit}) are not directly comparable. They differ in substance identity, measurement basis, or units of measure.",
+                )
+            )
+            continue
+
+        # Case 3: Validate that both part and jurisdiction substances have values/units
         if part_substance.value is None:
             raise ValueError(f"{part_substance.name} part substance value is not known")
         if part_substance.unit is None:
             raise ValueError(f"{part_substance.unit} part substance unit is not known")
+        # Validate that jurisidiction substance have values/unit
+
+        # If value is zero and condition is lte
+        # Then that substance is not allowed
+        if (
+            jurisidiction_substance.value == 0.0
+            and jurisidiction_substance.unit is None
+        ):
+            violations.append(
+                make_violation(
+                    part_substance,
+                    jurisidiction_substance,
+                    reason=f"The {part_substance.name} substance is not permitted in the given jurisdiction",
+                )
+            )
+            continue
+
         if jurisidiction_substance.value is None:
             raise ValueError(
                 f"{jurisidiction_substance.name} jurisdiction substance value is not known"
             )
         if jurisidiction_substance.unit is None:
             raise ValueError(
-                f"{jurisidiction_substance.name} jurisdiction substance value is not known"
+                f"{jurisidiction_substance.name} jurisdiction substance unit is not known"
             )
 
-        # Case 3: Normalize units by converting part substance units to match jurisdiction units
+        # Case 4: Normalize units by converting part substance units to match jurisdiction units
         part_substance.value = UnitConverter.convert(
             part_substance.value,
             part_substance.unit,
@@ -181,7 +213,7 @@ def check_compliance(
         )
         part_substance.unit = jurisidiction_substance.unit
 
-        # Case 4: Retrieve tolerance condition operator (e.g., <=, >=, <, >)
+        # Case 5: Retrieve tolerance condition operator (e.g., <=, >=, <, >)
         tolerance_condition = jurisidiction_substance.tolerance_condition
         check = ops.get(tolerance_condition) if tolerance_condition else None
 
