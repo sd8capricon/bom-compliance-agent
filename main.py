@@ -46,6 +46,9 @@ def main():
                     mime="text/markdown",
                 )
 
+                # Add and empty line to separate each agent run
+                print()
+
 
 if __name__ == "__main__":
     main()
