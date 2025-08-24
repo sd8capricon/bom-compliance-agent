@@ -1,10 +1,11 @@
 JURISDICTION_SUBSTANCE_EXTRACTION = """
 Extract all jurisdictions and their substance tolerances from the text below.
 
-A jurisdiction name must be a valid **geographic or regulatory region identifier**, such as:
+A jurisdiction name must be a real **geographic or regulatory region identifier**, such as:
 - A country name (e.g., "United States", "India", "Germany")
 - A continent or region (e.g., "Europe", "Asia-Pacific")
 - A recognized abbreviation (e.g., "EU")
+- If the text mentions something that is not a valid jurisdiction, ignore it.
 Do NOT use product names, company names, or generic terms as jurisdiction names.
 
 Substances Extraction Rules
@@ -52,8 +53,10 @@ You are a **Substance Mapping Agent**.
 
 Your role is to align chemical substances from a Bill of Materials (part) with regulatory substances defined by a jurisdiction.
 You must rely on chemical knowledge, synonyms, trivial/common names, IUPAC names, and elemental symbols to decide the best mappings.
+
 For every mapping you produce, you must also:
-- Determine physical comparability (is_comparable) to indicate whether both substances measure the same physical quantity.
+
+- Determine **physical comparability** (`is_comparable`) to indicate whether both substances measure the same physical quantity.
 
 You are given two lists of substances:
 
@@ -63,25 +66,26 @@ You are given two lists of substances:
 2. **Part substances** (from the BOM part):
 {part_substances}
 
-Your Task:
+### Your Task:
+
 1. Identify the best match between substances from the part and substances from the jurisdiction use substance standardized names for this.
 2. Matching should be based on chemical equivalence, synonyms, or element symbols (e.g., "Lead" ↔ "Pb").
 3. If a mapping cannot be found, leave the corresponding field as null.
-4. Physical quantity check (`is_comparable`):
+4. For **Physical comparibility check (`is_comparable`)**:
     - Determine if the measured property of the part substance and jurisdiction substance is the same physical quantity (e.g., both represent mass, volume, concentration, etc.).
     - For this purpose, all units of concentration (e.g., percentage(%), mass/mass, volume/volume, or parts-per-notation like ppm, ppb, ppt) should be considered the same physical quantity.
     - If they represent different physical quantities (e.g., mass vs concentration), set `is_comparable = False`.
     - If they represent the same physical quantity, set `is_comparable = True`.
 
-Output:
+### Output:
 Return a JSON object following this schema:
-
 {format_instructions}
 
-Notes:
+### Notes:
 - If multiple mappings exist, return them as multiple JSON objects (one per mapping).
 - Include all the part susbstances, if the corresponding mapping is not set the jurisdiction_substance to null.
 - Do not include those jurisdiction susbtances for which there are no corresponding part substance.
+- Do not change or normalize values or units — output exactly as given.
 """
 
 # NOTE: Work In Progess
@@ -106,4 +110,27 @@ Your Task:
     - mg/100mL (or mg/dL) → % if density assumptions are given.
 
 {format_instructions}
+"""
+
+MARKDOWN = """
+Format the following JSON into a professional, human-readable **Markdown compliance report**. Use tables to present:
+
+- Output **only the Markdown content**.
+- Do **not** include code fences (no `markdown or `).
+- Do **not** include any introduction or explanatory text.
+
+1. **Basic Report Info** (report name, jurisdiction(s))
+2. **Substance Tolerances** per jurisdiction:
+   * Show substance name, standardized name, threshold (value + unit), and tolerance condition
+   * Use a dash `-` if values are null
+3. **Compliance Summary Table** for each part:
+   * Part ID, Part Name, Jurisdiction, Compliant (Yes/No), Violations (comma-separated or "None")
+4. **Substance Compliance** inside each BOM part:
+   * Show compliant and violance substances in a nested table per BOM
+   * Include substance name, standard name, compliance status, concentration (value+unit), tolerance, whether it's ambiguous (Yes/No), and notes
+5. Visually separate different BOM components with headers and indentation if needed
+
+**Ensure Markdown is clean, readable, and well-organized.**. Use headings, subheadings, visual queues, and lists where appropriate.
+
+{json_report}
 """
